@@ -120,6 +120,8 @@ Copy code
 
 | `inputs` | Waarden die een gebruiker aan de flow doorgeeft |
 
+| `agents` | Geeft aan welke agent(s) deze flow mogen uitvoeren |
+
 | `steps` | Genummerde acties die de agent uitvoert |
 
 | `constraints` | Regels of beperkingen (safety policies) |
@@ -170,7 +172,7 @@ Copy code
 
 FLOW ::= "flow" STRING "{" FLOW\_BODY "}"
 
-FLOW\_BODY ::= (GOAL | CONTEXT | INPUTS | STEPS | CONSTRAINTS)\*
+FLOW\_BODY ::= (GOAL | CONTEXT | INPUTS | AGENTS | STEPS | CONSTRAINTS)\*
 
 
 
@@ -188,6 +190,10 @@ INPUTS ::= "inputs" "{" INPUT\_VAR\* "}"
 
 INPUT\_VAR ::= IDENTIFIER
 
+
+AGENTS      ::= "agents" "{" AGENT_PAIR* "}"
+
+AGENT_PAIR  ::= IDENTIFIER ":" STRING
 
 
 STEPS ::= "steps" "{" STEP\* "}"

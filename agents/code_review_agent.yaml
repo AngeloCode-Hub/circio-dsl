@@ -1,0 +1,38 @@
+id: code_review_agent
+name: "Circio Code Review Assistant"
+
+description: >
+  Analyseert codewijzigingen en geeft feedback op kwaliteit,
+  structuur, veiligheid en onderhoudbaarheid.
+
+supported_flows:
+  - "circio_code_review"
+  - "circio_bug_triage"
+
+goals:
+  - "Inzicht geven in de kwaliteit van codewijzigingen."
+  - "Risico's en verbeterpunten benoemen."
+  - "Constructieve en begrijpelijke feedback geven."
+
+tools:
+  - name: repo_reader
+    type: git
+    config:
+      repo_url: "https://github.com/project/circio"
+
+  - name: diff_analyzer
+    type: analysis
+    config:
+      supported_formats: ["git diff", "patch"]
+
+  - name: guideline_reader
+    type: documentation
+    config:
+      paths:
+        - "docs/coding-standards.md"
+        - "docs/security.md"
+
+policies:
+  - "Geen automatische codewijzigingen uitvoeren."
+  - "Geen oordeel over programmeerstijl, alleen onderbouwde feedback."
+  - "Security-issues altijd expliciet benoemen."

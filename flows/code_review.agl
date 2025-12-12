@@ -1,0 +1,37 @@
+flow "circio_code_review" {
+
+  goal: "Analyseer codewijzigingen en geef constructieve feedback op kwaliteit, leesbaarheid en risico's."
+
+  context {
+    repo        = "https://github.com/project/circio"
+    guidelines  = ["docs/coding-standards.md", "docs/security.md"]
+    language    = "mixed"
+  }
+
+  inputs {
+    target_files      // lijst van bestanden of diff
+    review_focus      // bijv. 'security', 'performance', 'readability'
+    strictness_level  // bijv. 'low', 'medium', 'high'
+  }
+
+  agents {
+    primary: "code_review_agent"
+    fallback: "bug_triage_agent"
+  }
+
+  steps {
+    1: load_code_changes
+    2: analyze_structure
+    3: detect_code_smells
+    4: check_best_practices
+    5: identify_risks
+    6: generate_review_summary
+  }
+
+  constraints {
+    - "Pas geen code automatisch aan."
+    - "Wees duidelijk over ernst (bijv. 'laag risico', 'hoog risico')."
+    - "Respecteer bestaande architectuurkeuzes."
+    - "Geef feedback als suggesties, niet als verplichtingen."
+  }
+}
