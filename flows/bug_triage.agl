@@ -1,0 +1,31 @@
+flow "circio_bug_triage" {
+
+  goal: "Analyseer een bugreport + relevante logs en geef een voorstel voor oorzaak en volgende stappen."
+
+  context {
+    repo        = "https://github.com/project/circio"
+    issue_tracker = "Jira"
+    docs        = ["docs/architecture.md", "docs/error-handling.md"]
+    log_folder  = "./logs"
+  }
+
+  inputs {
+    issue_id          // ID van het ticket of issue
+    log_snippet_path  // pad naar een specifiek logbestand of fragment
+    severity          // bijv. 'low', 'medium', 'high'
+  }
+
+  steps {
+    1: fetch_issue_details        // haal issue-beschrijving + geschiedenis op
+    2: collect_related_logs       // koppel issue aan relevante logs
+    3: identify_root_cause        // probeer de meest waarschijnlijke oorzaak te vinden
+    4: propose_fix_options        // stel mogelijke oplossingen voor
+    5: summarize_for_stakeholders // maak een begrijpelijke samenvatting (developer + non-tech)
+  }
+
+  constraints {
+    - "Verander geen code of configuratiebestanden automatisch."
+    - "De flow mag alleen lezen uit de repo en logs, niet schrijven."
+    - "Wees expliciet over onzekerheid (bijv. 'waarschijnlijke oorzaak' i.p.v. 'definitieve oorzaak')."
+  }
+}
