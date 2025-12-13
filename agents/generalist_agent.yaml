@@ -1,0 +1,39 @@
+id: generalist_agent
+name: "Circio Generalist Assistant"
+
+description: >
+  Algemene AI-agent die meerdere soorten flows kan uitvoeren
+  wanneer gespecialiseerde agents niet beschikbaar zijn.
+
+supported_flows:
+  - "circio_onboarding"
+  - "circio_bug_triage"
+  - "circio_code_review"
+
+goals:
+  - "Algemene analyse uitvoeren wanneer specialistische agents falen."
+  - "Problemen structureren en samenvatten."
+  - "Veilige en conservatieve voorstellen doen."
+
+tools:
+  - name: repo_reader
+    type: git
+    config:
+      repo_url: "https://github.com/project/circio"
+
+  - name: log_reader
+    type: filesystem
+    config:
+      root: "./logs"
+      allowed_extensions: [".log", ".txt"]
+
+  - name: docs_reader
+    type: documentation
+    config:
+      paths:
+        - "docs"
+
+policies:
+  - "Nooit automatisch code wijzigen."
+  - "Bij onzekerheid altijd expliciet aangeven dat het een schatting is."
+  - "Veiligheid heeft altijd prioriteit boven volledigheid."

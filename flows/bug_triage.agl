@@ -15,6 +15,11 @@ flow "circio_bug_triage" {
     severity          // bijv. 'low', 'medium', 'high'
   }
 
+    agents {
+    primary: "bug_triage_agent"
+    fallback: "generalist_agent"
+  }
+
   steps {
     1: fetch_issue_details        // haal issue-beschrijving + geschiedenis op
     2: collect_related_logs       // koppel issue aan relevante logs

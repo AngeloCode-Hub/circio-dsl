@@ -16,7 +16,7 @@ flow "circio_code_review" {
 
   agents {
     primary: "code_review_agent"
-    fallback: "bug_triage_agent"
+    fallback: "generalist_agent"
   }
 
   steps {
