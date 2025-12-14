@@ -37,3 +37,8 @@ policies:
   - "Nooit automatisch code wijzigen."
   - "Bij onzekerheid altijd expliciet aangeven dat het een schatting is."
   - "Veiligheid heeft altijd prioriteit boven volledigheid."
+
+skills:
+  - general_analysis
+  - summarization
+  - safe_fallback

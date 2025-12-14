@@ -36,3 +36,8 @@ policies:
   - "Geen automatische codewijzigingen uitvoeren."
   - "Geen oordeel over programmeerstijl, alleen onderbouwde feedback."
   - "Security-issues altijd expliciet benoemen."
+
+skills:
+  - code_review
+  - readability_analysis
+  - performance_analysis

@@ -14,10 +14,40 @@ flow "circio_code_review" {
     strictness_level  // bijv. 'low', 'medium', 'high'
   }
 
+  requires {
+  skills: ["code_review"]
+}
+
+  routing {
+  when review_focus == "security"
+       and strictness_level == "high"
+       and requires.skill == "security_analysis"
+    -> secondary "bug_triage_agent"
+
+  when requires.skill == "code_review"
+    -> primary "code_review_agent"
+
+  default -> fallback "generalist_agent"
+}
+
+
+explain {
+  enabled: true
+  level: "detailed"
+  include:
+    - matched_rule
+    - evaluated_conditions
+    - selected_agent
+    - rejected_rules
+}
+
+
   agents {
-    primary: "code_review_agent"
-    fallback: "generalist_agent"
-  }
+  primary: "code_review_agent"
+  secondary: "bug_triage_agent"
+  fallback: "generalist_agent"
+}
+
 
   steps {
     1: load_code_changes

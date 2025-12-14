@@ -39,3 +39,8 @@ policies:
   - "Geen gevoelige data (zoals secrets) in antwoorden opnemen."
   - "Altijd duidelijk aangeven als de oorzaak niet zeker is
      (bijv. 'waarschijnlijke oorzaak' i.p.v. 'definitieve oorzaak')."
+
+skills:
+  - security_analysis
+  - incident_response
+  - log_analysis

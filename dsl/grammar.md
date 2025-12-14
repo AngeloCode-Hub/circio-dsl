@@ -172,7 +172,7 @@ Copy code
 
 FLOW ::= "flow" STRING "{" FLOW\_BODY "}"
 
-FLOW\_BODY ::= (GOAL | CONTEXT | INPUTS | AGENTS | STEPS | CONSTRAINTS)\*
+FLOW\_BODY ::= (GOAL | CONTEXT | INPUTS | REQUIRES | ROUTING | EXPLAIN | AGENTS | STEPS | CONSTRAINTS)\*
 
 
 
@@ -188,7 +188,32 @@ CONTEXT\_PAIR ::= IDENTIFIER "=" (STRING | LIST)
 
 INPUTS ::= "inputs" "{" INPUT\_VAR\* "}"
 
-INPUT\_VAR ::= IDENTIFIER
+INPUT_VAR ::= IDENTIFIER [ ":" IDENTIFIER ]
+
+REQUIRES ::= "requires" "{" "skills" ":" LIST "}"
+
+ROUTING      ::= "routing" "{" ROUTE_RULE* "}"
+
+ROUTE_RULE   ::= "when" CONDITION "->" ROUTE_TARGET STRING
+              | "default" "->" ROUTE_TARGET STRING
+
+ROUTE_TARGET ::= "primary" | "secondary" | "fallback"
+
+CONDITION   ::= OR_EXPR
+
+OR_EXPR     ::= AND_EXPR ("or" AND_EXPR)*
+
+AND_EXPR    ::= NOT_EXPR ("and" NOT_EXPR)*
+
+NOT_EXPR    ::= ["not"] PRIMARY
+
+PRIMARY     ::= CLAUSE
+              | "(" CONDITION ")"
+
+CLAUSE      ::= IDENTIFIER "==" STRING
+
+EXPLAIN ::= "explain" "{" EXPLAIN_PAIR* "}"
+EXPLAIN_PAIR ::= IDENTIFIER ":" (STRING | LIST)
 
 
 AGENTS      ::= "agents" "{" AGENT_PAIR* "}"
