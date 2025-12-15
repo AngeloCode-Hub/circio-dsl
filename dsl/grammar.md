@@ -190,7 +190,12 @@ INPUTS ::= "inputs" "{" INPUT\_VAR\* "}"
 
 INPUT_VAR ::= IDENTIFIER [ ":" IDENTIFIER ]
 
-REQUIRES ::= "requires" "{" "skills" ":" LIST "}"
+REQUIRES      ::= "requires" "{" REQUIRE_PAIR* "}"
+REQUIRE_PAIR  ::= "skills" ":" LIST
+              |  "apply_to" ":" TARGET_LIST
+
+TARGET_LIST   ::= "[" ROUTE_TARGET ("," ROUTE_TARGET)* "]"
+
 
 ROUTING      ::= "routing" "{" ROUTE_RULE* "}"
 

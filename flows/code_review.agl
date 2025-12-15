@@ -1,6 +1,6 @@
 flow "circio_code_review" {
 
-  goal: "Analyseer codewijzigingen en geef constructieve feedback op kwaliteit, leesbaarheid en risico's."
+  goal: "Analyseer codewijzigingen en geef constructieve feedback op kwaliteit, leesbaarheid, performance en security risico's."
 
   context {
     repo        = "https://github.com/project/circio"
@@ -9,45 +9,42 @@ flow "circio_code_review" {
   }
 
   inputs {
-    target_files      // lijst van bestanden of diff
-    review_focus      // bijv. 'security', 'performance', 'readability'
-    strictness_level  // bijv. 'low', 'medium', 'high'
+    target_files
+    review_focus
+    strictness_level
   }
 
   requires {
-  skills: ["code_review"]
-}
+    skills: ["code_review"]
+    apply_to: ["primary", "secondary"]
+  }
 
   routing {
-  when review_focus == "security"
-       and strictness_level == "high"
-       and requires.skill == "security_analysis"
-    -> secondary "bug_triage_agent"
+    when (review_focus == "security" or review_focus == "performance")
+         and strictness_level == "high"
+      -> secondary "bug_triage_agent"
 
-  when requires.skill == "code_review"
-    -> primary "code_review_agent"
+    when review_focus == "security"
+      -> primary "bug_triage_agent"
 
-  default -> fallback "generalist_agent"
-}
+    when review_focus == "readability"
+      -> primary "code_review_agent"
 
+    default -> fallback "generalist_agent"
+  }
 
-explain {
-  enabled: true
-  level: "detailed"
-  include:
-    - matched_rule
-    - evaluated_conditions
-    - selected_agent
-    - rejected_rules
-}
-
+  explain {
+    enabled: "true"
+    level: "detailed"
+    include: ["matched_rule", "evaluated_conditions", "selected_agent", "skill_checks", "rejected_rules"]
+    style: "human"
+  }
 
   agents {
-  primary: "code_review_agent"
-  secondary: "bug_triage_agent"
-  fallback: "generalist_agent"
-}
-
+    primary: "code_review_agent"
+    secondary: "bug_triage_agent"
+    fallback: "generalist_agent"
+  }
 
   steps {
     1: load_code_changes
@@ -65,3 +62,4 @@ explain {
     - "Geef feedback als suggesties, niet als verplichtingen."
   }
 }
+

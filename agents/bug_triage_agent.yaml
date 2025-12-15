@@ -1,5 +1,5 @@
 id: bug_triage_agent
-name: "Circio Bug Triage Assistant"
+name: "Bug Triage / Security Agent"
 
 description: >
   Analyseert bugreports en logbestanden, stelt waarschijnlijke oorzaken voor
@@ -14,9 +14,16 @@ goals:
   - "Een waarschijnlijke root cause beschrijven."
   - "Concreet voorstel doen voor fix of vervolgonderzoek."
 
+skills:
+  - code_review
+  - security_analysis
+  - incident_response
+  - log_analysis
+  - risk_assessment
+
 tools:
-  - name: issue_tracker_client
-    type: http_api
+  - name: issue_tracker
+    type: jira
     config:
       system: "Jira"
       base_url: "https://jira.example.com"
@@ -39,8 +46,6 @@ policies:
   - "Geen gevoelige data (zoals secrets) in antwoorden opnemen."
   - "Altijd duidelijk aangeven als de oorzaak niet zeker is
      (bijv. 'waarschijnlijke oorzaak' i.p.v. 'definitieve oorzaak')."
+  - "No destructive actions."
+  - "Prefer explicit uncertainty ('likely cause' vs 'definitive')."
 
-skills:
-  - security_analysis
-  - incident_response
-  - log_analysis

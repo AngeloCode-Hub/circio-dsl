@@ -15,13 +15,18 @@ goals:
   - "Problemen structureren en samenvatten."
   - "Veilige en conservatieve voorstellen doen."
 
+skills:
+  - general_analysis
+  - summarization
+  - safe_fallback
+
 tools:
   - name: repo_reader
     type: git
     config:
       repo_url: "https://github.com/project/circio"
 
-  - name: log_reader
+  - name: basic_reader
     type: filesystem
     config:
       root: "./logs"
@@ -31,14 +36,14 @@ tools:
     type: documentation
     config:
       paths:
-        - "docs"
+        - "docs/coding-standards.md"
+        - "docs/security.md"
+
 
 policies:
   - "Nooit automatisch code wijzigen."
   - "Bij onzekerheid altijd expliciet aangeven dat het een schatting is."
   - "Veiligheid heeft altijd prioriteit boven volledigheid."
+  - "If requirements aren't met, provide safe next steps."
+  - "Do not claim certainty without evidence."
 
-skills:
-  - general_analysis
-  - summarization
-  - safe_fallback
