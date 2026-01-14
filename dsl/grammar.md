@@ -1,444 +1,131 @@
-\# Circio DSL – Grammar (v1)
+# Circio DSL – Grammar & Conventions (v0.2)
 
+Deze repo beschrijft een Domain-Specific Language (DSL) voor gestructureerde AI-interactie en flow-definities.
+Doel: flows en agents beschrijven op een manier die (1) menselijk leesbaar is, (2) machine/AI-parsebaar is,
+en (3) goed aansluit op visualisatie (OR1) en correctness principes (OR4).
 
+## 1. Kernconcepten
 
-Dit document beschrijft de \*\*eerste versie van de Domain-Specific Language (DSL)\*\* voor gestructureerde AI-interactie in Circio / Antigravity-achtige systemen.
+- **Agent**: beschrijving van een AI-agent (doel, inputs/outputs, capabilities, constraints).
+- **Flow**: beschrijving van een uitvoerbare keten van stappen (nodes) met data- en control-flow.
+- **Node**: één stap in een flow (bijv. api_call, function, transform, router).
+- **Port**: input/output van een node (impliciet via `input` en `output` velden).
+- **Connection**: verbinding tussen node outputs en inputs.
+- **Type (TMAP)**: datatype van inputs/outputs (bijv. `UserProfile`, `AccountId`).
+- **Function (FMAP)**: semantische transformatie (bijv. `validateUserProfile`, `mapToCRMContact`).
+- **State (OR1)**: runtime status van nodes (idle/running/success/error).
 
+## 2. Bestandslocaties
 
+- `agents/*.yaml`  → agent definities
+- `flows/*.agl` of `flows/*.yaml` → flow definities (kies 1 format; YAML aanbevolen voor consistentie)
+- `docs/*` → concepten, voorbeelden, rationale
 
-De DSL wordt gebruikt om \*\*flows\*\*, \*\*context\*\*, \*\*tools\*\*, \*\*agents\*\*, \*\*invoer\*\*, \*\*stappen\*\* en \*\*veiligheidsregels\*\* te definiëren.  
+## 3. Conventies
 
-Het doel is een duidelijke, leesbare taal voor ontwikkelaars en AI-agents.
+### 3.1 Identifiers
+- `id` is lowercase met underscores: `onboarding_agent`, `onboarding_flow`, `create_account`
+- Node ids zijn uniek binnen een flow.
 
+### 3.2 Types (TMAP)
+- Types zijn PascalCase: `UserProfile`, `AccountId`, `OnboardingResult`
+- Elke input/output krijgt een `type`.
 
+### 3.3 Functions (FMAP)
+- Functions zijn camelCase: `validateUserProfile`, `mapToAccountRequest`
+- Function nodes verwijzen naar `function:`.
 
----
+### 3.4 Node states (OR1)
+Standaard states:
+- `idle` (default)
+- `running`
+- `success`
+- `error`
 
+UI kan dit vertalen naar kleur/icoon.
 
+### 3.5 Node Types (v0.2)
+Toegestane node types (minimaal):
+- `function`  → voert een semantische transformatie uit (FMAP), bijv. validatie of mapping
+- `api_call`  → roept een externe API aan
+- `router`    → kiest een route op basis van een condition (control-flow)
+- `terminal`  → eindpunt van de flow (success/error)
 
-\## 1. Doel van deze DSL
+## 4. Agent DSL (YAML)
 
-
-
-Deze DSL is ontworpen om:
-
-
-
-\- AI-agents gestructureerde instructies te geven  
-
-\- flows te beschrijven in een mensvriendelijke syntax  
-
-\- definities van tools, context en policies vast te leggen  
-
-\- stabiele en reproduceerbare AI-acties te creëren  
-
-\- developers te helpen AI-workflows zonder programmeertaal te definiëren  
-
-
-
-De DSL is \*\*geen programmeertaal\*\*, maar een \*\*configuratie- en orkestratietaal\*\*.
-
-
-
----
-
-
-
-\## 2. Kernconcepten
-
-
-
-\### 2.1 Flow
-
-
-
-Een \*\*flow\*\* is een gestructureerde opdracht die een agent kan uitvoeren.
-
-
-
-Een flow bevat:
-
-
-
-\- \*\*goal\*\* – doel van de flow  
-
-\- \*\*context\*\* – externe informatie en bronnen  
-
-\- \*\*inputs\*\* – variabelen die door een gebruiker worden aangeleverd  
-
-\- \*\*steps\*\* – de volgorde van acties  
-
-\- \*\*constraints\*\* – veiligheidsregels  
-
-
-
----
-
-
-
-\## 3. Syntax Overview (menselijke uitleg)
-
-
-
-\### Voorbeeldstructuur van een flow:
-
-
-
-flow "naam" {
-
-goal: "..."
-
-context { ... }
-
-inputs { ... }
-
-steps { ... }
-
-constraints { ... }
-
-}
-
-
-
-markdown
-
-Copy code
-
-
-
-\### 3.1 Blokken
-
-
-
-| Blok | Beschrijving |
-
-|------|--------------|
-
-| `goal` | Het einddoel van de flow |
-
-| `context` | Beschikbare bronnen (repo, docs, environment, etc.) |
-
-| `inputs` | Waarden die een gebruiker aan de flow doorgeeft |
-
-| `agents` | Geeft aan welke agent(s) deze flow mogen uitvoeren |
-
-| `steps` | Genummerde acties die de agent uitvoert |
-
-| `constraints` | Regels of beperkingen (safety policies) |
-
-
-
----
-
-
-
-\## 4. Ondersteunde Datatypes
-
-
-
-| Type | Voorbeeld |
-
-|------|-----------|
-
-| `string` | `"tekst"` |
-
-| `list` | `\["a", "b", "c"]` |
-
-| `map/object` | `{ key = "value" }` |
-
-| `integer` | `1`, `2`, `3` |
-
-| `boolean` | `true`, `false` |
-
-
-
-\*Strings staan altijd tussen dubbele quotes.\*
-
-
-
----
-
-
-
-\## 5. Grammar (Formele definitie — BNF stijl)
-
-
-
-> Dit is hoe een parser de DSL zou begrijpen.  
-
-> Dit stuk is bedoeld voor ontwikkelaars / je verslag.
-
-
-
-FLOW ::= "flow" STRING "{" FLOW\_BODY "}"
-
-FLOW\_BODY ::= (GOAL | CONTEXT | INPUTS | REQUIRES | ROUTING | EXPLAIN | AGENTS | STEPS | CONSTRAINTS)\*
-
-
-
-GOAL ::= "goal:" STRING
-
-
-
-CONTEXT ::= "context" "{" CONTEXT\_PAIR\* "}"
-
-CONTEXT\_PAIR ::= IDENTIFIER "=" (STRING | LIST)
-
-
-
-INPUTS ::= "inputs" "{" INPUT\_VAR\* "}"
-
-INPUT_VAR ::= IDENTIFIER [ ":" IDENTIFIER ]
-
-REQUIRES      ::= "requires" "{" REQUIRE_PAIR* "}"
-REQUIRE_PAIR  ::= "skills" ":" LIST
-              |  "apply_to" ":" TARGET_LIST
-
-TARGET_LIST   ::= "[" ROUTE_TARGET ("," ROUTE_TARGET)* "]"
-
-
-ROUTING      ::= "routing" "{" ROUTE_RULE* "}"
-
-ROUTE_RULE   ::= "when" CONDITION "->" ROUTE_TARGET STRING
-              | "default" "->" ROUTE_TARGET STRING
-
-ROUTE_TARGET ::= "primary" | "secondary" | "fallback"
-
-CONDITION   ::= OR_EXPR
-
-OR_EXPR     ::= AND_EXPR ("or" AND_EXPR)*
-
-AND_EXPR    ::= NOT_EXPR ("and" NOT_EXPR)*
-
-NOT_EXPR    ::= ["not"] PRIMARY
-
-PRIMARY     ::= CLAUSE
-              | "(" CONDITION ")"
-
-CLAUSE      ::= IDENTIFIER "==" STRING
-
-EXPLAIN ::= "explain" "{" EXPLAIN_PAIR* "}"
-EXPLAIN_PAIR ::= IDENTIFIER ":" (STRING | LIST)
-
-
-AGENTS      ::= "agents" "{" AGENT_PAIR* "}"
-
-AGENT_PAIR  ::= IDENTIFIER ":" STRING
-
-
-STEPS ::= "steps" "{" STEP\* "}"
-
-STEP ::= INTEGER ":" IDENTIFIER
-
-
-
-CONSTRAINTS ::= "constraints" "{" CONSTRAINT\_LINE\* "}"
-
-CONSTRAINT\_LINE ::= "-" STRING
-
-
-
-yaml
-
-Copy code
-
-
-
----
-
-
-
-\## 6. Voorbeeld Flow (volledig)
-
-
-
-flow "circio\_onboarding" {
-
-
-
-goal: "Help een nieuwe developer starten met Circio"
-
-
-
-context {
-
-repo = "https://github.com/project/circio"
-
-docs = \["docs/architecture.md", "docs/flows.md"]
-
-environment = "local"
-
-}
-
-
-
-inputs {
-
-developer\_name
-
-project\_goal
-
-}
-
-
-
-steps {
-
-1: analyze\_requirements
-
-2: propose\_agent\_setup
-
-3: generate\_flow\_files
-
-4: validate\_with\_tests
-
-}
-
-
-
-constraints {
-
-\- "Voer geen destructieve shell-commands uit"
-
-\- "Vraag eerst toestemming voordat bestanden worden aangepast"
-
-}
-
-}
-
-
-
-yaml
-
-Copy code
-
-
-
----
-
-
-
-\## 7. Agent Definitie (aanbevolen structuur)
-
-
-
-Agents worden in een apart YAML-bestand gedefinieerd.
-
-
+### 4.1 Schema (v0.1)
 
 ```yaml
-
-id: onboarding\_agent
-
-name: "Circio Onboarding Assistant"
-
-
-
-goals:
-
-&nbsp; - "Uitleggen van DSL-structuur"
-
-&nbsp; - "Flow-bestanden genereren"
-
-&nbsp; - "Antwoorden valideren"
-
-
-
-tools:
-
-&nbsp; - name: repo\_reader
-
-&nbsp;   type: git
-
-&nbsp;   config:
-
-&nbsp;     repo\_url: "https://github.com/project/circio"
-
-
-
-&nbsp; - name: file\_writer
-
-&nbsp;   type: filesystem
-
-&nbsp;   config:
-
-&nbsp;     root: "./flows"
-
-
-
-policies:
-
-&nbsp; - "Geen commando’s buiten projectdirectory"
-
-&nbsp; - "Bevestiging vragen voor wijzigen van bestanden"
-
-8\. Mogelijke uitbreidingen
-
-Subflows
-
-
-
-Conditionele stappen (if step 2 fails → run step 4)
-
-
-
-Loops (repeat until success)
-
-
-
-Multi-agent flows
-
-
-
-Output-schema’s
-
-
-
-Metadata \& tags
-
-
-
-9\. Samenvatting
-
-Deze DSL biedt:
-
-
-
-een duidelijke flow-structuur
-
-
-
-consistente syntax
-
-
-
-ondersteuning voor goal, context, steps, inputs \& constraints
-
-
-
-uitbreidbaarheid voor agents en tools
-
-
-
-Dit document vormt de basis voor:
-
-
-
-je verslag
-
-
-
-parser-ontwerp
-
-
-
-voorbeeldflows
-
-
-
-agent-definities
-
-
-
-toekomstige technische implementatie
-
+id: onboarding_agent
+name: Circio Onboarding Assistant
+description: >
+  ...
+
+role: assistant
+domain: onboarding
+
+inputs:
+  - name: user_profile
+    type: UserProfile
+
+outputs:
+  - name: onboarding_result
+    type: OnboardingResult
+
+capabilities:
+  - explain_flow
+  - validate_inputs
+
+constraints:
+  - input.user_profile must_exist
+  - output.onboarding_result type_check
+---
+
+## 5. Flow DSL (YAML)
+
+### 5.1 Basisschema (v0.2)
+Een flow bevat minimaal:
+- `id`, `name`
+- `inputs` (typed)
+- `nodes`
+- `connections`
+- `outputs`
+- optioneel: `error_handling`
+
+### 5.2 Router node (branching)
+Een `router` node bepaalt de volgende node op basis van regels:
+
+
+- id: route_on_validation
+  type: router
+  input: validation_result
+  input_type: ValidationResult
+  routes:
+    - when: validation_result.is_valid == true
+      goto: create_account
+    - when: validation_result.is_valid == false
+      goto: end_with_error
+
+### 5.3 Condition syntax (v0.2)
+
+Conditions zijn eenvoudige expressies die gebruikt worden in `router` nodes.
+
+Ondersteund:
+- Vergelijkingen: `==`, `!=`, `>`, `<`, `>=`, `<=`
+- Boolean waarden: `true`, `false`
+- Dot-notation voor velden: `validation_result.is_valid`
+
+Voorbeelden:
+- `validation_result.is_valid == true`
+- `score > 0.8`
+- `user_profile.email != null`
+
+### 5.4 Terminal node (v0.2)
+
+Een `terminal` node beëindigt de flow expliciet.
+
+```yaml
+- id: end_with_error
+  type: terminal
+  result: error
+  message: "Validation failed"
