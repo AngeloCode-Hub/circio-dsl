@@ -1,0 +1,52 @@
+id: or4_valid_example
+name: OR4 Valid Example Flow
+description: >
+  Correct version of the OR4 example flow.
+
+inputs:
+  - name: user_profile
+    type: UserProfile
+
+nodes:
+  - id: validate_profile
+    type: function
+    function: validateUserProfile
+    input: user_profile
+    input_type: UserProfile
+    output: validation_result
+    output_type: ValidationResult
+
+  - id: route_on_validation
+    type: router
+    input: validation_result
+    input_type: ValidationResult
+    routes:
+      - when: validation_result.is_valid == true
+        goto: create_account
+      - when: validation_result.is_valid == false
+        goto: end_with_error
+
+  - id: create_account
+    type: api_call
+    api: createAccount
+    input: user_profile
+    input_type: UserProfile
+    output: account_id
+    output_type: AccountId
+
+  - id: end_with_error
+    type: terminal
+    result: error
+    message: "Validation failed"
+
+connections:
+  - from: validate_profile.output
+    to: route_on_validation.input
+
+outputs:
+  - name: account_id
+    type: AccountId
+
+error_handling:
+  - on: create_account
+    goto: end_with_error

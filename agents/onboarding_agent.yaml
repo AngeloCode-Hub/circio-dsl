@@ -1,38 +1,39 @@
 id: onboarding_agent
-name: "Circio Onboarding Assistant"
-
+name: Circio Onboarding Assistant
 description: >
-  Helpt nieuwe developers om snel te starten met het Circio-project
-  en begeleidt ze bij het opzetten van de eerste flows.
+  Assists users during the onboarding flow by explaining steps,
+  interpreting execution states, and suggesting next actions.
 
-supported_flows:
-  - "circio_onboarding"
+role: assistant
+domain: onboarding
 
-goals:
-  - "Uitleggen hoe de Circio DSL werkt."
-  - "Samen met de developer een eerste flow definiëren."
-  - "Benodigde bestanden genereren of voorbereiden."
+inputs:
+  - name: user_question
+    type: Text
+  - name: flow_state
+    type: FlowState
+  - name: current_node
+    type: NodeId
 
-tools:
-  - name: repo_reader
-    type: git
-    config:
-      repo_url: "https://github.com/project/circio"
+outputs:
+  - name: explanation
+    type: Text
+  - name: suggested_action
+    type: ActionHint
 
-  - name: docs_explorer
-    type: documentation
-    config:
-      paths:
-        - "docs/architecture.md"
-        - "docs/flows.md"
+capabilities:
+  - explain_flow_step
+  - explain_node_state
+  - explain_error
+  - suggest_next_step
 
-  - name: file_writer
-    type: filesystem
-    config:
-      root: "./flows"
-      allowed_extensions: [".agl", ".md"]
+constraints:
+  - input.flow_state must_exist
+  - output.explanation must_exist
 
-policies:
-  - "Geen productiebestanden overschrijven zonder expliciete bevestiging."
-  - "Alle wijzigingen eerst als voorstel tonen (diff) voordat ze definitief worden."
-  - "Geen commando's uitvoeren in de terminal."
+state_model:
+  node_states:
+    - idle
+    - running
+    - success
+    - error

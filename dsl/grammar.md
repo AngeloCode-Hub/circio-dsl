@@ -79,23 +79,13 @@ capabilities:
 constraints:
   - input.user_profile must_exist
   - output.onboarding_result type_check
----
 
+```
 ## 5. Flow DSL (YAML)
 
-### 5.1 Basisschema (v0.2)
-Een flow bevat minimaal:
-- `id`, `name`
-- `inputs` (typed)
-- `nodes`
-- `connections`
-- `outputs`
-- optioneel: `error_handling`
-
 ### 5.2 Router node (branching)
-Een `router` node bepaalt de volgende node op basis van regels:
 
-
+```yaml
 - id: route_on_validation
   type: router
   input: validation_result
@@ -106,26 +96,75 @@ Een `router` node bepaalt de volgende node op basis van regels:
     - when: validation_result.is_valid == false
       goto: end_with_error
 
-### 5.3 Condition syntax (v0.2)
-
-Conditions zijn eenvoudige expressies die gebruikt worden in `router` nodes.
-
-Ondersteund:
-- Vergelijkingen: `==`, `!=`, `>`, `<`, `>=`, `<=`
-- Boolean waarden: `true`, `false`
-- Dot-notation voor velden: `validation_result.is_valid`
-
-Voorbeelden:
-- `validation_result.is_valid == true`
-- `score > 0.8`
-- `user_profile.email != null`
-
-### 5.4 Terminal node (v0.2)
-
-Een `terminal` node beëindigt de flow expliciet.
-
-```yaml
 - id: end_with_error
   type: terminal
   result: error
   message: "Validation failed"
+
+```
+## 6. Correctness rules (OR4) (v0.1)
+
+Deze regels beschrijven statische validatie van FlowSpec voordat execution start.
+
+### 6.1 Required fields
+Flow:
+- `id`, `name`, `inputs`, `nodes`, `outputs` zijn verplicht.
+- `connections` verplicht voor flows met >1 node (v0.1).
+
+Node:
+- elke node heeft `id`, `type`.
+- node `id` uniek binnen de flow.
+
+### 6.2 Node type specific rules
+function:
+- vereist: `function`, `input`, `input_type`, `output`, `output_type`
+
+api_call:
+- vereist: `api`, `input`, `input_type`, `output`, `output_type`
+
+router:
+- vereist: `input`, `input_type`, `routes[]`
+- elke route heeft: `when`, `goto`
+- `goto` verwijst naar bestaande node id
+- minimaal 1 route
+
+terminal:
+- vereist: `result` in `{success,error}`
+- `message` optioneel
+
+### 6.3 Connections rules (wiring)
+- `from` moet bestaan als `<nodeId>.<outputName>` of `<nodeId>.output` (v0.1: we gebruiken `.output`)
+- `to` moet bestaan als `<nodeId>.<inputName>` of `<nodeId>.input` (v0.1: we gebruiken `.input`)
+- `from.nodeId` en `to.nodeId` moeten bestaan
+- geen duplicate connections met dezelfde `from`
+
+### 6.4 Type consistency (TMAP)
+- `connections` moeten type-compatible zijn:
+  - output_type van source node == input_type van target node
+- flow `outputs[]` moeten bestaan in Context:
+  - output key moet geproduceerd worden door een node output (of flow input)
+
+### 6.5 Reachability
+- Elke node (behalve start node) moet bereikbaar zijn via:
+  - een connection, of
+  - een router `goto`
+- Nodes die nooit bereikt kunnen worden -> warning/error (policy: error in v0.1 is ok)
+
+### 6.6 Termination
+- Flow moet een gegarandeerde stopmogelijkheid hebben:
+  - minstens 1 `terminal` node
+  - en die terminal moet bereikbaar zijn
+- Router zonder match pad is invalid (v0.1) tenzij later `default` bestaat
+
+### 6.7 Error handling validity
+- `error_handling[].on` moet verwijzen naar bestaande node id
+- `error_handling[].goto` moet verwijzen naar bestaande node id
+- `goto` mag terminal zijn (aanbevolen)
+
+### 6.8 Condition syntax (router.when)
+Ondersteund in v0.1:
+- `==`, `!=`, `>`, `<`, `>=`, `<=`
+- boolean literals: `true|false`
+- dot-notation op input object: `validation_result.is_valid`
+- null check: `!= null` (optioneel)
+Als parsing faalt -> invalid FlowSpec.

@@ -1,0 +1,59 @@
+id: or4_invalid_example
+name: OR4 Invalid Example Flow
+description: >
+  This flow intentionally violates OR4 rules for demonstration.
+
+inputs:
+  - name: user_profile
+    type: UserProfile
+
+nodes:
+  - id: validate_profile
+    type: function
+    function: validateUserProfile
+    input: user_profile
+    input_type: UserProfile
+    output: validation_result
+    output_type: ValidationResult
+
+  - id: route_on_validation
+    type: router
+    input: validation_result
+    input_type: ValidationResult
+    routes:
+      - when: validation_result.is_valid == true
+        goto: create_account
+      - when: validation_result.is_valid == false
+        goto: end_with_error
+
+  - id: create_account
+    type: api_call
+    api: createAccount
+    input: validation_result
+    input_type: ValidationResult
+    output: account_id
+    output_type: AccountId
+
+  - id: end_with_error
+    type: terminal
+    result: error
+    message: "Validation failed"
+
+connections:
+  - from: validate_profile.output
+    to: route_on_validation.input
+
+  # OR4-FOUT: deze connection verwijst naar een node die niet bestaat
+  - from: route_on_validation.output
+    to: notify_admin.input
+
+outputs:
+  - name: account_id
+    type: AccountId
+
+error_handling:
+  # OR4-FOUT: goto verwijst naar een niet-bestaande node
+  - on: create_account
+    goto: non_existing_terminal
+
+
